@@ -32,7 +32,7 @@ export class HealthController {
   @HealthCheck()
   @Perm(PermissionHealth.NETWORK)
   async checkNetwork() {
-    return this.http.pingCheck('kuizuo', 'https://baozouai.cn')
+    return this.http.pingCheck('kuizuo', 'https://kuizuo.cn')
   }
 
   @Get('database')
