@@ -67,3 +67,4 @@ lerna-debug.log*
 
 .nestjs_repl_history
 out
+documentation

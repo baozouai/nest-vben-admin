@@ -56,7 +56,6 @@ async function paginateQueryBuilder<T>(
   options: IPaginationOptions,
 ): Promise<Pagination<T>> {
   const [page, limit, paginationType] = resolveOptions(options)
-
   if (paginationType === PaginationTypeEnum.TAKE_AND_SKIP)
     queryBuilder.take(limit).skip((page - 1) * limit)
   else

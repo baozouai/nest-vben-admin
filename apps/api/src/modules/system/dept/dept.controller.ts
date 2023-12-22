@@ -20,7 +20,6 @@ export const permissions: PermissionMap<'system:dept'> = {
   UPDATE: 'system:dept:update',
   DELETE: 'system:dept:delete',
 } as const
-
 @ApiSecurityAuth()
 @ApiTags('System - 部门模块')
 @Controller('depts')

@@ -24,7 +24,7 @@ export class RoleEntity extends AbstractEntity {
   @ApiProperty({ description: '状态：1启用，0禁用' })
   status: number
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: false })
   @ApiProperty({ description: '是否默认用户' })
   default: boolean
 

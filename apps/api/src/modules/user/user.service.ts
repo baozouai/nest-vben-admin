@@ -5,7 +5,7 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import Redis from 'ioredis'
 import { isEmpty, isNil } from 'lodash'
 
-import { EntityManager, Like, Repository } from 'typeorm'
+import { EntityManager, In, Like, Repository } from 'typeorm'
 
 import { BusinessException } from '~/common/exceptions/biz.exception'
 import { ErrorEnum } from '~/constants/error-code.constant'
@@ -27,6 +27,7 @@ import { PasswordUpdateDto } from './dto/password.dto'
 import { UserDto, UserQueryDto, UserUpdateDto } from './dto/user.dto'
 import { UserEntity } from './entities/user.entity'
 import { AccountInfo } from './user.model'
+import { DeptService } from '../system/dept/dept.service'
 
 @Injectable()
 export class UserService {
@@ -41,6 +42,7 @@ export class UserService {
     private readonly dictService: DictService,
     private readonly qqService: QQService,
     private readonly configService: ConfigService,
+    private readonly deptService: DeptService
   ) {}
 
   async findUserById(id: number): Promise<UserEntity | undefined> {
@@ -68,12 +70,19 @@ export class UserService {
    * @param uid user id
    */
   async getAccountInfo(uid: number): Promise<AccountInfo> {
-    const user: UserEntity = await this.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.roles', 'role')
-      .where(`user.id = :uid`, { uid })
-      .getOne()
-
+    // const user: UserEntity = await this.userRepository
+    //   .createQueryBuilder('user')
+    //   .leftJoinAndSelect('user.roles', 'role')
+    //   .where(`user.id = :uid`, { uid })
+    //   .getOne()
+    const user = await this.userRepository.findOne({
+      where: {
+        id: uid,
+      },
+      relations: {
+        roles: true
+      }
+    })
     if (isEmpty(user))
       throw new BusinessException(ErrorEnum.USER_NOT_FOUND)
 
@@ -170,7 +179,7 @@ export class UserService {
         password,
         ...data,
         psalt: salt,
-        roles: await this.roleRepository.findByIds(roles),
+        roles: await this.roleRepository.findBy({ id: In(roles) } ),
       })
 
       const result = await manager.save(u)
@@ -194,13 +203,18 @@ export class UserService {
         status,
       })
 
-      const user = await this.userRepository
-        .createQueryBuilder('user')
-        .leftJoinAndSelect('user.roles', 'roles')
-        .leftJoinAndSelect('user.dept', 'dept')
-        .where('user.id = :id', { id })
-        .getOne()
-
+      // const user = await this.userRepository
+      //   .createQueryBuilder('user')
+      //   .leftJoinAndSelect('user.roles', 'roles')
+      //   .leftJoinAndSelect('user.dept', 'dept')
+      //   .where('user.id = :id', { id })
+      //   .getOne()
+      const user = await this.userRepository.findOne({
+        where: {
+          id,
+        },
+        relations: ['roles', 'dept']
+      })
       await manager
         .createQueryBuilder()
         .relation(UserEntity, 'roles')
@@ -225,15 +239,20 @@ export class UserService {
    * @param id 用户id
    */
   async info(id: number): Promise<UserEntity> {
-    const user = await this.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.roles', 'roles')
-      .leftJoinAndSelect('user.dept', 'dept')
-      .where('user.id = :id', { id })
-      .getOne()
-
-    delete user.password
-    delete user.psalt
+    // const user = await this.userRepository
+    //   .createQueryBuilder('user')
+    //   .leftJoinAndSelect('user.roles', 'roles')
+    //   .leftJoinAndSelect('user.dept', 'dept')
+    //   .where('user.id = :id', { id })
+    //   .getOne()
+    const user = await this.userRepository.findOne({
+      where: {
+        id,
+      },
+      relations: ['roles', 'dept']
+    })
+    // delete user.password
+    // delete user.psalt
 
     return user
   }
@@ -246,7 +265,6 @@ export class UserService {
     if (userIds.includes(rootUserId))
       throw new BadRequestException('不能删除root用户!')
 
-    await this.userRepository.delete(userIds)
     await this.userRepository.delete(userIds)
   }
 
@@ -272,24 +290,45 @@ export class UserService {
     email,
     status,
   }: UserQueryDto): Promise<Pagination<UserEntity>> {
-    const queryBuilder = this.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.dept', 'dept')
-      .leftJoinAndSelect('user.roles', 'role')
-      // .where('user.id NOT IN (:...ids)', { ids: [rootUserId, uid] })
-      .where({
+
+    // const queryBuilder = this.userRepository
+    //   .createQueryBuilder('user')
+    //   .leftJoinAndSelect('user.dept', 'dept')
+    //   .leftJoinAndSelect('user.roles', 'role')
+    //   // .where('user.id NOT IN (:...ids)', { ids: [rootUserId, uid] })
+    //   .where({
+    //     ...(username ? { username: Like(`%${username}%`) } : null),
+    //     ...(nickname ? { nickname: Like(`%${nickname}%`) } : null),
+    //     ...(email ? { email: Like(`%${email}%`) } : null),
+    //     ...(status ? { status } : null),
+    //   })
+
+    //   if (deptId) {
+    //    const allIds = await this.deptService.getDeptIds(deptId)
+    //     queryBuilder.where({
+    //       dept: {
+    //         id: In(allIds)
+    //       }
+    //     })
+    //   }
+
+
+    // return paginate<UserEntity>(queryBuilder, {
+    //   page,
+    //   pageSize,
+    // })
+    return paginate<UserEntity>(this.userRepository, {
+      page,
+      pageSize,
+    }, {
+      where: {
         ...(username ? { username: Like(`%${username}%`) } : null),
         ...(nickname ? { nickname: Like(`%${nickname}%`) } : null),
         ...(email ? { email: Like(`%${email}%`) } : null),
         ...(status ? { status } : null),
-      })
-
-    if (deptId)
-      queryBuilder.andWhere('dept.id = :deptId', { deptId })
-
-    return paginate<UserEntity>(queryBuilder, {
-      page,
-      pageSize,
+        ...(deptId ? { dept: { id: In(await this.deptService.getDeptIds(deptId)) } } : null),
+      },
+      relations: ['dept', 'roles']
     })
   }
 

@@ -134,4 +134,30 @@ export class DeptService {
 
     return deptTree
   }
+  /**
+   * 找到当前部门及其所有子部门
+   */
+  async findDescendantsTree(deptId: number): Promise<DeptEntity> {
+    const dept = await this.info(deptId)
+    const deptTree = await this.deptRepository.findDescendantsTree(dept)
+
+    return deptTree
+  }
+
+  /**
+   * 获取部门下的所有部门id
+   * @param deptId
+   */
+  async getDeptIds(deptId: number): Promise<number[]> {
+    const deptTree = await this.findDescendantsTree(deptId)
+    const deptIds: number[] = []
+
+    function getAllIds(dept: DeptEntity) {
+      deptIds.push(dept.id)
+      dept.children.forEach(getAllIds)
+    }
+    getAllIds(deptTree)
+
+    return deptIds
+  }
 }

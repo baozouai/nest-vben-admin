@@ -77,12 +77,25 @@ export class MenuService {
       menus = await this.menuRepository.find({ order: { orderNo: 'ASC' } })
     }
     else {
-      menus = await this.menuRepository
-        .createQueryBuilder('menu')
-        .innerJoinAndSelect('menu.roles', 'role')
-        .andWhere('role.id IN (:...roleIds)', { roleIds })
-        .orderBy('menu.order_no', 'ASC')
-        .getMany()
+      // menus = await this.menuRepository
+      //   .createQueryBuilder('menu')
+      //   .innerJoinAndSelect('menu.roles', 'role')
+      //   .andWhere('role.id IN (:...roleIds)', { roleIds })
+      //   .orderBy('menu.order_no', 'ASC')
+      //   .getMany()
+      menus = await this.menuRepository.find({
+        where: {
+          roles: {
+            id: In(roleIds),
+          },
+        },
+        order: {
+          orderNo: 'ASC',
+        },
+        relations: {
+          roles: true,
+        }
+      })
     }
 
     const menuList = generatorRouters(menus)
@@ -178,13 +191,26 @@ export class MenuService {
       if (isEmpty(roleIds))
         return permission
 
-      result = await this.menuRepository
-        .createQueryBuilder('menu')
-        .innerJoinAndSelect('menu.roles', 'role')
-        .andWhere('role.id IN (:...roleIds)', { roleIds })
-        .andWhere('menu.type IN (1,2)')
-        .andWhere('menu.permission IS NOT NULL')
-        .getMany()
+      // result = await this.menuRepository
+      //   .createQueryBuilder('menu')
+      //   .innerJoinAndSelect('menu.roles', 'role')
+      //   .andWhere('role.id IN (:...roleIds)', { roleIds })
+      //   .andWhere('menu.type IN (1,2)')
+      //   .andWhere('menu.permission IS NOT NULL')
+      //   .getMany()
+
+      result = await this.menuRepository.find({
+        where: {
+          type: In([1, 2]),
+          roles: {
+            id: In(roleIds),
+          },
+          permission: Not(IsNull()),
+        },
+        relations: {
+          roles: true,
+        }
+      })
     }
     if (!isEmpty(result)) {
       result.forEach((e) => {

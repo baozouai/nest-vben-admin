@@ -38,13 +38,13 @@ export class RoleService {
    * 根据角色获取角色信息
    */
   async info(id: number): Promise<RoleInfo> {
-    const info = await this.roleRepository
-      .createQueryBuilder('role')
-      .where({
-        id,
-      })
-      .getOne()
-
+    // const info = await this.roleRepository
+    //   .createQueryBuilder('role')
+    //   .where({
+    //     id,
+    //   })
+    //   .getOne()
+    const info = await this.roleRepository.findOneBy({ id } )
     const menus = await this.menuRepository.find({
       where: { roles: { id } },
       select: ['id'],
@@ -83,8 +83,8 @@ export class RoleService {
     if (!isEmpty(menuIds)) {
       // using transaction
       await this.entityManager.transaction(async (manager) => {
-        const menus = await this.menuRepository.find({
-          where: { id: In(menuIds) },
+        const menus = await this.menuRepository.findBy({
+          id: In(menuIds)
         })
 
         const role = await this.roleRepository.findOne({ where: { id } })

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Module, forwardRef } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { DictModule } from '../system/dict/dict.module'
@@ -9,6 +9,7 @@ import { RoleModule } from '../system/role/role.module'
 import { UserEntity } from './entities/user.entity'
 import { UserController } from './user.controller'
 import { UserService } from './user.service'
+import { DeptModule } from '../system/dept/dept.module'
 
 const providers = [UserService]
 
@@ -18,6 +19,7 @@ const providers = [UserService]
     RoleModule,
     MenuModule,
     DictModule,
+    DeptModule,
   ],
   controllers: [UserController],
   providers: [...providers],

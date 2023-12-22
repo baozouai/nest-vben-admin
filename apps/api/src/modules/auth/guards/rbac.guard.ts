@@ -43,7 +43,7 @@ export class RbacGuard implements CanActivate {
     if (allowAnon)
       return true
 
-    const payloadPermission = this.reflector.getAllAndOverride<
+    let payloadPermission = this.reflector.getAllAndOverride<
       string | string[]
     >(PERMISSION_KEY,
       [context.getHandler(), context.getClass()],
@@ -59,16 +59,11 @@ export class RbacGuard implements CanActivate {
 
     const allPermissions = await this.authService.getPermissionsCache(user.uid) ?? await this.authService.getPermissions(user.uid)
 
-    let canNext = false
 
+    payloadPermission = Array.isArray(payloadPermission) ? payloadPermission: [payloadPermission]
     // handle permission strings
-    if (Array.isArray(payloadPermission)) {
       // 只要有一个权限满足即可
-      canNext = payloadPermission.every(i => allPermissions.includes(i))
-    }
-
-    if (typeof payloadPermission === 'string')
-      canNext = allPermissions.includes(payloadPermission)
+    const canNext = payloadPermission.some(i => allPermissions.includes(i))
 
     if (!canNext)
       throw new BusinessException(ErrorEnum.NO_PERMISSION)
