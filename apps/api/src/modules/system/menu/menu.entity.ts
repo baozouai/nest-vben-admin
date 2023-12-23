@@ -3,6 +3,7 @@ import { Column, Entity, ManyToMany, Relation } from 'typeorm'
 import { AbstractEntity } from '~/common/entity/abstract.entity'
 
 import { RoleEntity } from '../role/role.entity'
+import { MenuType } from './menu.dto'
 
 @Entity({ name: 'sys_menu' })
 export class MenuEntity extends AbstractEntity {
@@ -18,8 +19,8 @@ export class MenuEntity extends AbstractEntity {
   @Column({ nullable: true })
   permission: string
 
-  @Column({ type: 'tinyint', default: 0 })
-  type: number
+  @Column({ type: 'tinyint', default: MenuType.DIRECTORY, enum: MenuType, enumName: 'MenuType' })
+  type: MenuType
 
   @Column({ nullable: true, default: '' })
   icon: string

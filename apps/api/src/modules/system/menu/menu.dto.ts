@@ -7,12 +7,26 @@ import {
   Min,
   MinLength,
   ValidateIf,
+  IsEnum,
 } from 'class-validator'
-
+export enum MenuType {
+  /** 目录 */
+  DIRECTORY,
+  /** 菜单 */
+  MENU,
+  /** 权限 */
+  PERMISSION,
+}
 export class MenuDto {
-  @ApiProperty({ description: '菜单类型' })
-  @IsIn([0, 1, 2])
-  type: number
+  // @ApiProperty({ description: '菜单类型' })
+  // @IsIn([0, 1, 2])
+  // type: number
+
+  @ApiProperty({ description: '菜单类型', enum: MenuType, enumName: 'MenuType' })
+  @IsEnum(MenuType, {
+    message: `type必须是${MenuType.DIRECTORY}、${MenuType.MENU}、${MenuType.PERMISSION}其中之一`,
+  })
+  type: MenuType
 
   @ApiProperty({ description: '父级菜单' })
   @IsOptional()

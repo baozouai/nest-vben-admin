@@ -14,7 +14,7 @@ import { deleteEmptyChildren, generatorMenu, generatorRouters } from '~/utils'
 
 import { RoleService } from '../role/role.service'
 
-import { MenuDto, MenuQueryDto, MenuUpdateDto } from './menu.dto'
+import { MenuDto, MenuQueryDto, MenuType, MenuUpdateDto } from './menu.dto'
 
 @Injectable()
 export class MenuService {
@@ -106,16 +106,16 @@ export class MenuService {
    * 检查菜单创建规则是否符合
    */
   async check(dto: Partial<MenuDto>): Promise<void | never> {
-    if (dto.type === 2 && !dto.parent) {
-      // 无法直接创建权限，必须有parent
+    if (dto.type === MenuType.PERMISSION && !dto.parent) {
+      // 权限必须有parent
       throw new BusinessException(ErrorEnum.PERMISSION_REQUIRES_PARENT)
     }
-    if (dto.type === 1 && dto.parent) {
+    if (dto.type === MenuType.MENU && dto.parent) {
       const parent = await this.getMenuItemInfo(dto.parent)
       if (isEmpty(parent))
         throw new BusinessException(ErrorEnum.PARENT_MENU_NOT_FOUND)
 
-      if (parent && parent.type === 1) {
+      if (parent.type === MenuType.MENU) {
         // 当前新增为菜单但父节点也为菜单时为非法操作
         throw new BusinessException(
           ErrorEnum.ILLEGAL_OPERATION_DIRECTORY_PARENT,
@@ -127,22 +127,23 @@ export class MenuService {
   /**
    * 查找当前菜单下的子菜单，目录以及菜单
    */
-  async findChildMenus(mid: number): Promise<any> {
-    const allMenus: any = []
-    const menus = await this.menuRepository.findBy({ parent: mid })
+  async findChildMenuIds(mid: number): Promise<number[]> {
+    const allMenuIds: number[] = []
+    // 找到当前mid下的所有子目录
+    const childMenus = await this.menuRepository.findBy({ parent: mid })
     // if (_.isEmpty(menus)) {
     //   return allMenus;
     // }
     // const childMenus: any = [];
-    for (const menu of menus) {
-      if (menu.type !== 2) {
+    for (const childMenu of childMenus) {
+      if (childMenu.type !== 2) {
         // 子目录下是菜单或目录，继续往下级查找
-        const c = await this.findChildMenus(menu.id)
-        allMenus.push(c)
+        const c = await this.findChildMenuIds(childMenu.id)
+        allMenuIds.push(...c)
       }
-      allMenus.push(menu.id)
+      allMenuIds.push(childMenu.id)
     }
-    return allMenus
+    return allMenuIds
   }
 
   /**
@@ -179,8 +180,8 @@ export class MenuService {
    */
   async getPermissions(uid: number): Promise<string[]> {
     const roleIds = await this.roleService.getRoleIdsByUser(uid)
-    let permission: any[] = []
-    let result: any = null
+    let permission: string[] = []
+    let result: MenuEntity[] = null
     if (this.roleService.hasAdminRole(roleIds)) {
       result = await this.menuRepository.findBy({
         permission: Not(IsNull()),
@@ -207,18 +208,18 @@ export class MenuService {
           },
           permission: Not(IsNull()),
         },
-        relations: {
-          roles: true,
-        }
+        // relations: {
+        //   roles: true,
+        // }
       })
     }
-    if (!isEmpty(result)) {
-      result.forEach((e) => {
-        if (e.permission)
-          permission = concat(permission, e.permission.split(','))
-      })
-      permission = uniq(permission)
-    }
+
+    result.forEach((e) => {
+      if (e.permission)
+        permission = concat(permission, e.permission.split(','))
+    })
+    permission = uniq(permission)
+
     return permission
   }
 
@@ -246,10 +247,10 @@ export class MenuService {
    */
   async refreshOnlineUserPerms(): Promise<void> {
     const onlineUserIds: string[] = await this.redis.keys('admin:token:*')
-    if (onlineUserIds && onlineUserIds.length > 0) {
+    if (onlineUserIds) {
       onlineUserIds
         .map(i => i.split('admin:token:')[1])
-        .filter(i => i)
+        .filter(Boolean)
         .forEach(async (uid) => {
           const perms = await this.getPermissions(Number.parseInt(uid))
           await this.redis.set(`admin:perms:${uid}`, JSON.stringify(perms))

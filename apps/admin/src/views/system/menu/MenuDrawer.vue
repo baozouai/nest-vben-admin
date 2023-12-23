@@ -55,7 +55,7 @@
     try {
       const values = await validate();
       setDrawerProps({ confirmLoading: true });
-
+      values.type = 4
       if (!unref(isUpdate)) {
         await createMenu(values as MenuParams);
       } else {

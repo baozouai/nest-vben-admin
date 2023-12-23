@@ -17,7 +17,7 @@ import { ApiSecurityAuth } from '~/common/decorators/swagger.decorator'
 import { Perm, PermissionMap } from '~/modules/auth/decorators/permission.decorator'
 import { MenuEntity } from '~/modules/system/menu/menu.entity'
 
-import { MenuDto, MenuQueryDto, MenuUpdateDto } from './menu.dto'
+import { MenuDto, MenuQueryDto, MenuType, MenuUpdateDto } from './menu.dto'
 import { MenuService } from './menu.service'
 
 export const permissions: PermissionMap<'system:menu'> = {
@@ -58,11 +58,11 @@ export class MenuController {
     if (!dto.parent)
       dto.parent = null
 
-    if (dto.type === 0)
+    if (dto.type === MenuType.DIRECTORY)
       dto.component = 'LAYOUT'
 
     await this.menuService.create(dto)
-    if (dto.type === 2) {
+    if (dto.type === MenuType.PERMISSION) {
       // 如果是权限发生更改，则刷新所有在线用户的权限
       await this.menuService.refreshOnlineUserPerms()
     }
@@ -81,7 +81,7 @@ export class MenuController {
       dto.parent = null
 
     await this.menuService.update(id, dto)
-    if (dto.type === 2) {
+    if (dto.type === MenuType.PERMISSION) {
       // 如果是权限发生更改，则刷新所有在线用户的权限
       await this.menuService.refreshOnlineUserPerms()
     }
@@ -95,8 +95,8 @@ export class MenuController {
       throw new BadRequestException('该菜单存在关联角色，无法删除')
 
     // 如果有子目录，一并删除
-    const childMenus = await this.menuService.findChildMenus(id)
-    await this.menuService.deleteMenuItem(flattenDeep([id, childMenus]))
+    const childMenus = await this.menuService.findChildMenuIds(id)
+    await this.menuService.deleteMenuItem([id, ...childMenus])
     // 刷新在线用户权限
     await this.menuService.refreshOnlineUserPerms()
   }
