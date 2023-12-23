@@ -261,12 +261,12 @@ export class MenuService {
    * 根据菜单ID查找是否有关联角色
    */
   async checkRoleByMenuId(id: number): Promise<boolean> {
-    return !!(await this.menuRepository.findOne({
+    const menu = await this.menuRepository.findOne({
       where: {
-        roles: {
-          id,
-        },
+        id,
       },
-    }))
+      relations: ['roles']
+    })
+    return !!menu.roles?.length
   }
 }
