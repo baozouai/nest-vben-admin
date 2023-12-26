@@ -64,8 +64,8 @@ export const searchFormSchema: FormSchema[] = [
     },
   },
   {
-    field: '异常信息',
-    label: 'detail',
+    field: 'detail',
+    label: '异常信息',
     component: 'Input',
     colProps: {
       sm: 12,
