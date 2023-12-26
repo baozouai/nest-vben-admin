@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Post, Query, Put } from '@nestjs/common'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
 
 import { ApiResult } from '~/common/decorators/api-result.decorator'
@@ -49,7 +49,7 @@ export class DictController {
     return this.dictService.findOne(id)
   }
 
-  @Post(':id')
+  @Put(':id')
   @ApiOperation({ summary: '更新字典配置' })
   @Perm(permissions.UPDATE)
   async update(@IdParam() id: number, @Body() dto: DictDto): Promise<void> {
