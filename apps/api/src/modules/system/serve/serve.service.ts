@@ -10,14 +10,14 @@ export class ServeService {
    */
   async getServeStat(): Promise<ServeStatInfo> {
     const [versions, osinfo, cpuinfo, currentLoadinfo, meminfo] = (
-      await Promise.allSettled([
+      await Promise.all([
         si.versions('node, npm'),
         si.osInfo(),
         si.cpu(),
         si.currentLoad(),
         si.mem(),
       ])
-    ).map((p: any) => p.value)
+    )
 
     // 计算总空间
     const diskListInfo = await si.fsSize()
