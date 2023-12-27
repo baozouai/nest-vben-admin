@@ -39,7 +39,7 @@ export class TaskService implements OnModuleInit {
   constructor(
     @InjectRepository(TaskEntity)
     private taskRepository: Repository<TaskEntity>,
-    @InjectQueue(SYS_TASK_QUEUE_NAME) private taskQueue: Queue,
+    @InjectQueue(SYS_TASK_QUEUE_NAME) private taskQueue: Queue<{ id: number, service: string, args: string }>,
     private moduleRef: ModuleRef,
     private reflector: Reflector,
     @InjectRedis() private redis: Redis,
