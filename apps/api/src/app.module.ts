@@ -35,7 +35,7 @@ import { SocketModule } from './socket/socket.module'
 
     AuthModule,
     SystemModule,
-    TasksModule,
+    TasksModule.forRoot(),
     ToolsModule,
     SocketModule,
     HealthModule,

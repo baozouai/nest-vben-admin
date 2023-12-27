@@ -10,9 +10,9 @@ import { Mission } from '../mission.decorator'
 @Injectable()
 @Mission()
 export class EmailJob {
+  private logger = new Logger(EmailJob.name)
   constructor(
     private readonly emailService: MailerService,
-    private readonly logger: Logger,
   ) {}
 
   async send(config: any): Promise<void> {

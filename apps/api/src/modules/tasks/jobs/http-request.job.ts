@@ -9,9 +9,9 @@ import { Mission } from '../mission.decorator'
 @Injectable()
 @Mission()
 export class HttpRequestJob {
+  private logger = new Logger(HttpRequestJob.name)
   constructor(
     private readonly httpService: HttpService,
-    private readonly logger: Logger,
   ) {}
 
   /**
@@ -21,7 +21,7 @@ export class HttpRequestJob {
   async handle(config: unknown): Promise<void> {
     if (config) {
       const result = await this.httpService.request(config)
-      this.logger.log(result, HttpRequestJob.name)
+      result.subscribe(res => console.log(res))
     }
     else {
       throw new BadRequestException('Http request job param is empty')

@@ -28,6 +28,7 @@ import {
   SYS_TASK_QUEUE_NAME,
   SYS_TASK_QUEUE_PREFIX,
   TaskStatus,
+  TaskType,
 } from './constant'
 import { TaskDto, TaskQueryDto, TaskUpdateDto } from './task.dto'
 
@@ -81,7 +82,7 @@ export class TaskService implements OnModuleInit {
 
     // 查找所有需要运行的任务
     const tasks = await this.taskRepository.findBy({ status: 1 })
-    if (tasks && tasks.length > 0) {
+    if (tasks) {
       for (const t of tasks)
         await this.start(t)
     }
@@ -163,7 +164,7 @@ export class TaskService implements OnModuleInit {
   async update(id: number, dto: TaskUpdateDto): Promise<void> {
     await this.taskRepository.update(id, dto)
     const task = await this.info(id)
-    if (task.status === 0)
+    if (task.status === TaskStatus.Disabled)
       await this.stop(task)
     else if (task.status === TaskStatus.Activited)
       await this.start(task)
@@ -179,7 +180,7 @@ export class TaskService implements OnModuleInit {
     // 先停掉之前存在的任务
     await this.stop(task)
     let repeat: any
-    if (task.type === 1) {
+    if (task.type === TaskType.Interval) {
       // 间隔 Repeat every millis (cron setting cannot be used together with this setting.)
       repeat = {
         every: task.every,
@@ -209,8 +210,7 @@ export class TaskService implements OnModuleInit {
         jobOpts: JSON.stringify(job.opts.repeat),
         status: 1,
       })
-    }
-    else {
+    } else {
       // update status to 0，标识暂停任务，因为启动失败
       await job?.remove()
       await this.taskRepository.update(task.id, {
@@ -295,11 +295,12 @@ export class TaskService implements OnModuleInit {
   ): Promise<void | never> {
     try {
       let service: any
-      if (typeof nameOrInstance === 'string')
-        service = await this.moduleRef.get(nameOrInstance, { strict: false })
-      else
+      if (typeof nameOrInstance === 'string') {
+        service = this.moduleRef.get(nameOrInstance, { strict: false })
+      }
+      else {
         service = nameOrInstance
-
+      }
       // 所执行的任务不存在
       if (!service || !(exec in service))
         throw new NotFoundException('任务不存在')

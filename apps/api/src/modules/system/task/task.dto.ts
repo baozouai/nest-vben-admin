@@ -2,6 +2,7 @@ import { BadRequestException } from '@nestjs/common'
 import { ApiProperty, ApiPropertyOptional, IntersectionType, PartialType } from '@nestjs/swagger'
 import {
   IsDateString,
+  IsEnum,
   IsIn,
   IsInt,
   IsOptional,
@@ -19,6 +20,7 @@ import * as parser from 'cron-parser'
 import { isEmpty } from 'lodash'
 
 import { PagerDto } from '~/common/dto/pager.dto'
+import { TaskStatus, TaskType } from './constant'
 
 // cron 表达式验证，bull lib下引用了cron-parser
 @ValidatorConstraint({ name: 'isCronExpression', async: false })
@@ -53,12 +55,12 @@ export class TaskDto {
   @MinLength(1)
   service: string
 
-  @ApiProperty({ description: '任务类别：cron | interval' })
-  @IsIn([0, 1])
-  type: number
+  @ApiProperty({ description: '任务类别：cron | interval', enum: TaskType, enumName: 'TaskType' })
+  @IsEnum(TaskType, { message: '任务类别不正确' })
+  type: TaskType
 
-  @ApiProperty({ description: '任务状态' })
-  @IsIn([0, 1])
+  @ApiProperty({ description: '任务状态', enum: TaskStatus, enumName: 'TaskStatus' })
+  @IsEnum(TaskStatus)
   status: number
 
   @ApiPropertyOptional({ description: '开始时间', type: Date })
