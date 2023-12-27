@@ -2,7 +2,7 @@ import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
   EmailConfig = '/tools/email/config',
-  SendEmail = '/tools/email',
+  SendEmail = '/email/send',
 }
 
 export const getEmailConfig = () => defHttp.get({ url: Api.EmailConfig });
