@@ -3,7 +3,7 @@ import { defHttp } from '/@/utils/http/axios';
 import qs from 'qs';
 
 enum Api {
-  Base = '/tools/storage',
+  Base = '/storage',
 }
 
 export interface Storage {

@@ -19,7 +19,7 @@ import { StorageService } from './storage.service'
 export class StorageController {
   constructor(private storageService: StorageService) {}
 
-  @Get('list')
+  @Get()
   @ApiOperation({ summary: '获取本地存储列表' })
   @ApiResult({ type: StorageInfo, isPage: true })
   @Perm('tool:storage:list')
