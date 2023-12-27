@@ -10,7 +10,7 @@ import {
 import { ModuleRef, Reflector } from '@nestjs/core'
 import { UnknownElementException } from '@nestjs/core/errors/exceptions/unknown-element.exception'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Queue } from 'bull'
+import { CronRepeatOptions, EveryRepeatOptions, Queue } from 'bull'
 import Redis from 'ioredis'
 import { isEmpty } from 'lodash'
 import { Like, Repository } from 'typeorm'
@@ -81,7 +81,7 @@ export class TaskService implements OnModuleInit {
     })
 
     // 查找所有需要运行的任务
-    const tasks = await this.taskRepository.findBy({ status: 1 })
+    const tasks = await this.taskRepository.findBy({ status:  TaskStatus.Activited })
     if (tasks) {
       for (const t of tasks)
         await this.start(t)
@@ -179,7 +179,7 @@ export class TaskService implements OnModuleInit {
 
     // 先停掉之前存在的任务
     await this.stop(task)
-    let repeat: any
+    let repeat: CronRepeatOptions | EveryRepeatOptions
     if (task.type === TaskType.Interval) {
       // 间隔 Repeat every millis (cron setting cannot be used together with this setting.)
       repeat = {
@@ -198,8 +198,9 @@ export class TaskService implements OnModuleInit {
       if (task.endTime)
         repeat.endDate = task.endTime
     }
-    if (task.limit > 0)
+    if (task.limit > 0) {
       repeat.limit = task.limit
+    }
 
     const job = await this.taskQueue.add(
       { id: task.id, service: task.service, args: task.data },
@@ -274,14 +275,23 @@ export class TaskService implements OnModuleInit {
   async updateTaskCompleteStatus(tid: number): Promise<void> {
     const jobs = await this.taskQueue.getRepeatableJobs()
     const task = await this.taskRepository.findOneBy({ id: tid })
-    // 如果下次执行时间小于当前时间，则表示已经执行完成。
+    const taskId = tid.toString()
+    const { jobOpts } = task
+    try {
+      const { key } = JSON.parse(jobOpts)
+          // 如果下次执行时间小于当前时间，则表示已经执行完成。
     for (const job of jobs) {
       const currentTime = new Date().getTime()
-      if (job.id === tid.toString() && job.next < currentTime) {
-        // 如果下次执行时间小于当前时间，则表示已经执行完成。
-        await this.stop(task)
-        break
+      if (job.id === taskId && key === job.key) {
+        if (job.next < currentTime) {
+          // 如果下次执行时间小于当前时间，则表示已经执行完成。
+          await this.stop(task)
+          break
+        }
       }
+    }
+    } catch(e) {
+      throw e
     }
   }
 
