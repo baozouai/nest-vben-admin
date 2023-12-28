@@ -5,6 +5,7 @@ import { AbstractEntity } from '~/common/entity/abstract.entity'
 
 import { UserEntity } from '../../user/entities/user.entity'
 import { MenuEntity } from '../menu/menu.entity'
+import { CommonFlag } from '~/common/type'
 
 @Entity({ name: 'sys_role' })
 export class RoleEntity extends AbstractEntity {
@@ -20,9 +21,9 @@ export class RoleEntity extends AbstractEntity {
   @ApiProperty({ description: '角色描述' })
   remark: string
 
-  @Column({ type: 'tinyint', nullable: true, default: 1 })
-  @ApiProperty({ description: '状态：1启用，0禁用' })
-  status: number
+  @Column({ type: 'tinyint', nullable: true, default: CommonFlag.TRUE, enum: CommonFlag, enumName: 'CommonFlag' })
+  @ApiProperty({ type: 'enum', description: '状态：1启用，0禁用', enum: CommonFlag, enumName: 'CommonFlag' })
+  status: CommonFlag
 
   @Column({ nullable: true, default: false })
   @ApiProperty({ description: '是否默认用户' })

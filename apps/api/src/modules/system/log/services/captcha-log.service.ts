@@ -6,7 +6,7 @@ import { LessThan, Repository } from 'typeorm'
 import { paginate } from '~/helper/paginate'
 
 import { CaptchaLogQueryDto } from '../dto/log.dto'
-import { CaptchaLogEntity } from '../entities/captcha-log.entity'
+import { CaptchaLogEntity, CaptchaLogProvider } from '../entities/captcha-log.entity'
 
 @Injectable()
 export class CaptchaLogService {
@@ -18,7 +18,7 @@ export class CaptchaLogService {
   async create(
     account: string,
     code: string,
-    provider: 'sms' | 'email',
+    provider: CaptchaLogProvider,
     uid?: number,
   ): Promise<void> {
     await this.captchaLogRepository.save({

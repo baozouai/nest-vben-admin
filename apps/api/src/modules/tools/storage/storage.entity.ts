@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { Column, Entity } from 'typeorm'
+import { Column, Entity, JoinTable, ManyToOne } from 'typeorm'
 
 import { AbstractEntity } from '~/common/entity/abstract.entity'
+import { UserEntity } from '~/modules/user/entities/user.entity'
 
 @Entity({ name: 'tool_storage' })
 export class Storage extends AbstractEntity {
@@ -23,7 +24,7 @@ export class Storage extends AbstractEntity {
   extName: string
 
   @Column({ type: 'varchar' })
-  @ApiProperty({ description: '文件类型' })
+  @ApiProperty({ description: '文件路径' })
   path: string
 
   @Column({ type: 'varchar', nullable: true })
@@ -34,7 +35,8 @@ export class Storage extends AbstractEntity {
   @ApiProperty({ description: '文件大小' })
   size: string
 
-  @Column({ nullable: true, name: 'user_id' })
+  @ManyToOne(() => UserEntity)
+  @JoinTable({ name: 'user_id' })
   @ApiProperty({ description: '用户ID' })
-  userId: number
+  user: UserEntity
 }

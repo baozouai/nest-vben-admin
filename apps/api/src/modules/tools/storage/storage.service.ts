@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Between, Like, Repository } from 'typeorm'
 
-import { paginateRaw } from '~/helper/paginate'
+import { paginate, paginateRaw } from '~/helper/paginate'
 import { PaginationTypeEnum } from '~/helper/paginate/interface'
 import { Pagination } from '~/helper/paginate/pagination'
 import { Storage } from '~/modules/tools/storage/storage.entity'
@@ -52,7 +52,7 @@ export class StorageService {
   }: StoragePageDto): Promise<Pagination<StorageInfo>> {
     const queryBuilder = this.storageRepository
       .createQueryBuilder('storage')
-      .leftJoinAndSelect('sys_user', 'user', 'storage.user_id = user.id')
+        .leftJoinAndSelect('storage.user', 'user')
       .where({
         ...(name && { name: Like(`%${name}%`) }),
         ...(type && { type }),
@@ -60,28 +60,28 @@ export class StorageService {
         ...(size && { size: Between(size[0], size[1]) }),
         ...(time && { createdAt: Between(time[0], time[1]) }),
         ...(username && {
-          userId: await (await this.userRepository.findOneBy({ username })).id,
+          user: { username: Like(`%${username}%`) },
         }),
       })
       .orderBy('storage.created_at', 'DESC')
 
-    const { items, ...rest } = await paginateRaw<Storage>(queryBuilder, {
+    const { items, ...rest } = await paginate<Storage>(queryBuilder, {
       page,
       pageSize,
       paginationType: PaginationTypeEnum.LIMIT_AND_OFFSET,
     })
 
     function formatResult(result: Storage[]) {
-      return result.map((e: any) => {
+      return result.map((e) => {
         return {
-          id: e.storage_id,
-          name: e.storage_name,
-          extName: e.storage_ext_name,
-          path: e.storage_path,
-          type: e.storage_type,
-          size: e.storage_size,
-          createdAt: e.storage_created_at,
-          username: e.user_username,
+          id: e.id,
+          name: e.name,
+          extName: e.extName,
+          path: e.path,
+          type: e.type,
+          size: e.size,
+          createdAt: e.createdAt.toString(),
+          username: e.user.username,
         }
       })
     }

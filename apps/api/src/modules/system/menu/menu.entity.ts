@@ -4,6 +4,7 @@ import { AbstractEntity } from '~/common/entity/abstract.entity'
 
 import { RoleEntity } from '../role/role.entity'
 import { MenuType } from './menu.dto'
+import { CommonFlag } from '~/common/type'
 
 @Entity({ name: 'sys_menu' })
 export class MenuEntity extends AbstractEntity {
@@ -31,17 +32,17 @@ export class MenuEntity extends AbstractEntity {
   @Column({ name: 'component', nullable: true })
   component: string
 
-  @Column({ type: 'tinyint', default: 0 })
-  external: number
+  @Column({ type: 'tinyint', default: CommonFlag.FALSE, enum: CommonFlag, enumName: 'CommonFlag' })
+  external: CommonFlag
 
-  @Column({ type: 'tinyint', default: 1 })
-  keepalive: number
+  @Column({ type: 'tinyint', default: CommonFlag.TRUE, enum: CommonFlag, enumName: 'CommonFlag' })
+  keepalive: CommonFlag
 
-  @Column({ type: 'tinyint', default: 1 })
-  show: number
+  @Column({ type: 'tinyint', default: CommonFlag.TRUE, enum: CommonFlag, enumName: 'CommonFlag' })
+  show: CommonFlag
 
-  @Column({ type: 'tinyint', default: 1 })
-  status: number
+  @Column({ type: 'tinyint', default: CommonFlag.TRUE, enum: CommonFlag, enumName: 'CommonFlag' })
+  status: CommonFlag
 
   @ManyToMany(() => RoleEntity, role => role.menus)
   roles: Relation<RoleEntity[]>

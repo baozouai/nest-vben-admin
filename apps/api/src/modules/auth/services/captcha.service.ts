@@ -6,6 +6,7 @@ import { isEmpty } from 'lodash'
 
 import { BusinessException } from '~/common/exceptions/biz.exception'
 import { ErrorEnum } from '~/constants/error-code.constant'
+import { CaptchaLogProvider } from '~/modules/system/log/entities/captcha-log.entity'
 import { CaptchaLogService } from '~/modules/system/log/services/captcha-log.service'
 
 @Injectable()
@@ -31,7 +32,7 @@ export class CaptchaService {
   async log(
     account: string,
     code: string,
-    provider: 'sms' | 'email',
+    provider: CaptchaLogProvider,
     uid?: number,
   ): Promise<void> {
     await this.captchaLogService.create(account, code, provider, uid)
