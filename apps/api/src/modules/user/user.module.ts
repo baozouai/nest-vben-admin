@@ -10,12 +10,13 @@ import { UserEntity } from './entities/user.entity'
 import { UserController } from './user.controller'
 import { UserService } from './user.service'
 import { DeptModule } from '../system/dept/dept.module'
+import { RoleEntity } from '../system/role/role.entity'
 
 const providers = [UserService]
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity]),
+    TypeOrmModule.forFeature([UserEntity, RoleEntity]),
     RoleModule,
     MenuModule,
     DictModule,
@@ -23,6 +24,6 @@ const providers = [UserService]
   ],
   controllers: [UserController],
   providers: [...providers],
-  exports: [TypeOrmModule, ...providers],
+  exports: [...providers],
 })
 export class UserModule {}

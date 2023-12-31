@@ -17,6 +17,6 @@ const providers = [MenuService]
   ],
   controllers: [MenuController],
   providers: [...providers],
-  exports: [TypeOrmModule, ...providers],
+  exports: [...providers],
 })
 export class MenuModule {}

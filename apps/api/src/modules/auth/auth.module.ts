@@ -59,6 +59,6 @@ const strategies = [LocalStrategy, JwtStrategy]
   ],
   controllers: [...controllers],
   providers: [...providers, ...strategies],
-  exports: [TypeOrmModule, JwtModule, ...providers],
+  exports: [ JwtModule, ...providers],
 })
 export class AuthModule {}

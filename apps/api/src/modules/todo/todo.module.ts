@@ -11,6 +11,6 @@ const services = [TodoService]
   imports: [TypeOrmModule.forFeature([TodoEntity])],
   controllers: [TodoController],
   providers: [...services],
-  exports: [TypeOrmModule, ...services],
+  exports: [...services],
 })
 export class TodoModule {}

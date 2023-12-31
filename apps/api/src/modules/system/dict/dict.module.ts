@@ -11,6 +11,6 @@ const services = [DictService]
   imports: [TypeOrmModule.forFeature([DictEntity])],
   controllers: [DictController],
   providers: [...services],
-  exports: [TypeOrmModule, ...services],
+  exports: [ ...services],
 })
 export class DictModule {}

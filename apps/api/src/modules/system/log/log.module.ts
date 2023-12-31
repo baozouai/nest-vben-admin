@@ -20,6 +20,6 @@ const providers = [LoginLogService, TaskLogService, CaptchaLogService]
   ],
   controllers: [LogController],
   providers: [...providers],
-  exports: [TypeOrmModule, ...providers],
+  exports: [...providers],
 })
 export class LogModule {}

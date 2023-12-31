@@ -18,6 +18,6 @@ const providers: Provider[] = [StorageService, UploadService]
   imports: [TypeOrmModule.forFeature([Storage, UserEntity])],
   controllers: [EmailController, StorageController, UploadController],
   providers,
-  exports: [TypeOrmModule, ...providers],
+  exports: [ ...providers],
 })
 export class ToolsModule {}

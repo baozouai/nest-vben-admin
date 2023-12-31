@@ -32,6 +32,6 @@ const providers = [TaskService, TaskConsumer]
   ],
   controllers: [TaskController],
   providers: [...providers],
-  exports: [TypeOrmModule, ...providers],
+  exports: [...providers],
 })
 export class TaskModule {}
