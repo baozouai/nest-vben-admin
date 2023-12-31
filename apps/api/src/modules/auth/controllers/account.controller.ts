@@ -15,12 +15,12 @@ import { AccountInfo } from '../../user/user.model'
 import { UserService } from '../../user/user.service'
 import { AuthService } from '../auth.service'
 import { AccountUpdateDto } from '../dto/account.dto'
-import { JwtAuthGuard } from '../guards/jwt-auth.guard'
+// import { JwtAuthGuard } from '../guards/jwt-auth.guard'
 
 @ApiTags('Account - 账户模块')
 @ApiSecurityAuth()
 @ApiExtraModels(AccountInfo)
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @Controller('account')
 export class AccountController {
   constructor(

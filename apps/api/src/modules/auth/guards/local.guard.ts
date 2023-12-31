@@ -5,7 +5,7 @@ import { AuthStrategy } from '../auth.constant'
 
 @Injectable()
 export class LocalGuard extends AuthGuard(AuthStrategy.LOCAL) {
-  async canActivate(context: ExecutionContext) {
-    return true
-  }
+  // async canActivate(context: ExecutionContext) {
+  //   return true
+  // }
 }

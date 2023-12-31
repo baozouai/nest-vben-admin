@@ -1,5 +1,5 @@
-import { Body, Controller, Headers, Post, UseGuards } from '@nestjs/common'
-import { ApiOperation, ApiTags } from '@nestjs/swagger'
+import { Body, Controller, Headers, Post, Req, UseGuards } from '@nestjs/common'
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger'
 
 import { ApiResult } from '~/common/decorators/api-result.decorator'
 import { Ip } from '~/common/decorators/http.decorator'
@@ -11,9 +11,9 @@ import { Public } from './decorators/public.decorator'
 import { LoginDto, RegisterDto } from './dto/auth.dto'
 import { LocalGuard } from './guards/local.guard'
 import { LoginToken } from './models/auth.model'
+import { FastifyRequest } from 'fastify'
 
 @ApiTags('Auth - 认证模块')
-@UseGuards(LocalGuard)
 @Public()
 @Controller('auth')
 export class AuthController {
@@ -23,17 +23,20 @@ export class AuthController {
   ) {}
 
   @Post('login')
+  @UseGuards(LocalGuard)
   @ApiOperation({ summary: '登录' })
   @ApiResult({ type: LoginToken })
+  @ApiBody({ type: LoginDto })
   async login(
-    @Body() dto: LoginDto,
+    @Req() req: FastifyRequest,
     @Ip() ip: string,
     @Headers('user-agent') ua: string,
   ): Promise<LoginToken> {
     // await this.loginService.checkImgCaptcha(dto.captchaId, dto.verifyCode);
     const token = await this.authService.login(
-      dto.username,
-      dto.password,
+      // dto.username,
+      // dto.password,
+      req.user,
       ip,
       ua,
     )

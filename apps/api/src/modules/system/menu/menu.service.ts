@@ -185,7 +185,7 @@ export class MenuService {
     if (this.roleService.hasAdminRole(roleIds)) {
       result = await this.menuRepository.findBy({
         permission: Not(IsNull()),
-        type: In([1, 2]),
+        type: In([MenuType.MENU, MenuType.PERMISSION]),
       })
     }
     else {
@@ -202,7 +202,7 @@ export class MenuService {
 
       result = await this.menuRepository.find({
         where: {
-          type: In([1, 2]),
+          type: In([MenuType.MENU, MenuType.PERMISSION]),
           roles: {
             id: In(roleIds),
           },

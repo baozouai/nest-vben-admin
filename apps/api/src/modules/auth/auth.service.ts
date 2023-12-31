@@ -29,7 +29,7 @@ export class AuthService {
     private tokenService: TokenService,
   ) {}
 
-  async validateUser(credential: string, password: string): Promise<any> {
+  async validateUser(credential: string, password: string) {
     const user = await this.userService.findUserByUserName(credential)
 
     if (isEmpty(user))
@@ -40,48 +40,79 @@ export class AuthService {
       throw new BusinessException(ErrorEnum.INVALID_USERNAME_PASSWORD)
 
     if (user) {
-      const { password, ...result } = user
-      return result
+      const { password, id, ...result } = user
+      return { uid: id }
     }
 
     return null
   }
 
+  // /**
+  //  * 获取登录JWT
+  //  * 返回null则账号密码有误，不存在该用户
+  //  */
+  // async login(
+  //   username: string,
+  //   password: string,
+  //   ip: string,
+  //   ua: string,
+  // ): Promise<string> {
+  //   const user = await this.userService.findUserByUserName(username)
+  //   if (isEmpty(user))
+  //     throw new BusinessException(ErrorEnum.INVALID_USERNAME_PASSWORD)
+
+  //   const comparePassword = md5(`${password}${user.psalt}`)
+  //   if (user.password !== comparePassword)
+  //     throw new BusinessException(ErrorEnum.INVALID_USERNAME_PASSWORD)
+
+  //   const roleIds = await this.roleService.getRoleIdsByUser(user.id)
+
+  //   const roles = await this.roleService.getRoleValues(roleIds)
+
+  //   // 包含access_token和refresh_token
+  //   const token = await this.tokenService.generateAccessToken(user.id, roles)
+
+  //   await this.redis.set(`auth:token:${user.id}`, token.accessToken)
+
+  //   // 设置密码版本号 当密码修改时，版本号+1
+  //   await this.redis.set(`auth:passwordVersion:${user.id}`, 1)
+
+  //   // 设置菜单权限
+  //   const permissions = await this.menuService.getPermissions(user.id)
+  //   await this.setPermissionsCache(user.id, permissions)
+
+  //   await this.loginLogService.create(user.id, ip, ua)
+
+  //   return token.accessToken
+  // }
   /**
    * 获取登录JWT
    * 返回null则账号密码有误，不存在该用户
    */
   async login(
-    username: string,
-    password: string,
+    user: IAuthUser,
     ip: string,
     ua: string,
   ): Promise<string> {
-    const user = await this.userService.findUserByUserName(username)
-    if (isEmpty(user))
-      throw new BusinessException(ErrorEnum.INVALID_USERNAME_PASSWORD)
+    const { uid } = user
 
-    const comparePassword = md5(`${password}${user.psalt}`)
-    if (user.password !== comparePassword)
-      throw new BusinessException(ErrorEnum.INVALID_USERNAME_PASSWORD)
-
-    const roleIds = await this.roleService.getRoleIdsByUser(user.id)
+    const roleIds = await this.roleService.getRoleIdsByUser(uid)
 
     const roles = await this.roleService.getRoleValues(roleIds)
 
     // 包含access_token和refresh_token
-    const token = await this.tokenService.generateAccessToken(user.id, roles)
+    const token = await this.tokenService.generateAccessToken(uid, roles)
 
-    await this.redis.set(`auth:token:${user.id}`, token.accessToken)
+    await this.redis.set(`auth:token:${uid}`, token.accessToken)
 
     // 设置密码版本号 当密码修改时，版本号+1
-    await this.redis.set(`auth:passwordVersion:${user.id}`, 1)
+    await this.redis.set(`auth:passwordVersion:${uid}`, 1)
 
     // 设置菜单权限
-    const permissions = await this.menuService.getPermissions(user.id)
-    await this.setPermissionsCache(user.id, permissions)
+    const permissions = await this.menuService.getPermissions(uid)
+    await this.setPermissionsCache(uid, permissions)
 
-    await this.loginLogService.create(user.id, ip, ua)
+    await this.loginLogService.create(uid, ip, ua)
 
     return token.accessToken
   }

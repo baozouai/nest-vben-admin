@@ -59,11 +59,12 @@ async function bootstrap() {
       stopAtFirstError: true,
       exceptionFactory: errors =>
         new UnprocessableEntityException(
-          errors.map((e) => {
-            const rule = Object.keys(e.constraints!)[0]
-            const msg = e.constraints![rule]
-            return msg
-          })[0],
+          // errors.map((e) => {
+          //   const rule = Object.keys(e.constraints!)[0]
+          //   const msg = e.constraints![rule]
+          //   return msg
+          // })[0],
+          Object.values(errors[0].constraints),
         ),
     }),
   )
@@ -73,11 +74,12 @@ async function bootstrap() {
   setupSwagger(app, configService)
 
   await app.listen(port, '0.0.0.0', async () => {
+
     app.useLogger(app.get(MyLogger))
     const url = await app.getUrl()
     const { pid } = process
-    const env = cluster.isPrimary
-    const prefix = env ? 'P' : 'W'
+
+    const prefix = cluster.isPrimary ? 'P' : 'W'
 
     if (!isMainProcess)
       return

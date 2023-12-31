@@ -53,12 +53,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
       && !(exception instanceof BusinessException)
     ) {
       Logger.error(exception, undefined, 'Catch')
-
       // 生产环境下隐藏错误信息
-      if (!isDev)
-        message = ErrorEnum.SERVER_ERROR?.split(':')[1]
-    }
-    else {
+      if (!isDev) message = ErrorEnum.SERVER_ERROR?.split(':')[1]
+    } else {
       this.logger.warn(
         `错误信息：(${status}) ${message} Path: ${decodeURI(url)}`,
       )
