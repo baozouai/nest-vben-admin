@@ -8,7 +8,7 @@ const providers: Provider[] = [
   QQService,
 ]
 
-@Global()
+// @Global()
 @Module({
   imports: [],
   providers,

@@ -3,6 +3,8 @@ import IORedis from 'ioredis'
 import type { Redis, RedisOptions } from 'ioredis'
 
 export class RedisSubPub {
+  private logger = new Logger(RedisSubPub.name)
+
   public pubClient: Redis
   public subClient: Redis
   constructor(
@@ -31,7 +33,7 @@ export class RedisSubPub {
     const channel = this.channelPrefix + event
     const _data = JSON.stringify(data)
     if (event !== 'log')
-      Logger.debug(`发布事件：${channel} <- ${_data}`, RedisSubPub.name)
+      this.logger.debug(`发布事件：${channel} <- ${_data}`)
 
     await this.pubClient.publish(channel, _data)
   }
@@ -42,10 +44,10 @@ export class RedisSubPub {
     const myChannel = this.channelPrefix + event
     this.subClient.subscribe(myChannel)
 
-    const cb = (channel, message) => {
+    const cb = (channel: string, message: string) => {
       if (channel === myChannel) {
         if (event !== 'log')
-          Logger.debug(`接收事件：${channel} -> ${message}`, RedisSubPub.name)
+        this.logger.debug(`接收事件：${channel} -> ${message}`)
 
         callback(JSON.parse(message))
       }

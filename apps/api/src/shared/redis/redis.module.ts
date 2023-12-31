@@ -26,7 +26,7 @@ const providers: Provider[] = [
   RedisPubSubService,
 ]
 
-@Global()
+// @Global()
 @Module({
   imports: [
     // cache

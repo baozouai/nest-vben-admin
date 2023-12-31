@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { CronExpression } from '@nestjs/schedule'
 import dayjs from 'dayjs'
 
-import { LessThan } from 'typeorm'
+import { LessThan, LessThanOrEqual } from 'typeorm'
 
 import { CronOnce } from '~/common/decorators/cron-once.decorator'
 import { AccessTokenEntity } from '~/modules/auth/entities/access-token.entity'
@@ -21,7 +21,7 @@ export class CronService {
 
     const expiredTokens = await AccessTokenEntity.find({
       where: {
-        expired_at: LessThan(new Date()),
+        expired_at: LessThanOrEqual(new Date()),
       },
     })
 
