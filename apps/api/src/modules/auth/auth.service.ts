@@ -133,7 +133,7 @@ export class AuthService {
 
   async logout(uid: number) {
     // 删除token
-    await this.userService.forbidden(uid)
+    await this.userService.multiForbidden(uid)
   }
 
   /**
@@ -149,7 +149,7 @@ export class AuthService {
    * 清除登录状态信息
    */
   async clearLoginStatus(uid: number): Promise<void> {
-    await this.userService.forbidden(uid)
+    await this.userService.multiForbidden(uid)
   }
 
   /**

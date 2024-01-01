@@ -16,6 +16,7 @@ import { AccessTokenEntity } from '~/modules/auth/entities/access-token.entity'
 
 import { DeptEntity } from '~/modules/system/dept/dept.entity'
 import { RoleEntity } from '~/modules/system/role/role.entity'
+import { UserStatus } from '../constant'
 
 @Entity({ name: 'sys_user' })
 export class UserEntity extends AbstractEntity {
@@ -48,8 +49,8 @@ export class UserEntity extends AbstractEntity {
   @Column({ nullable: true })
   remark: string
 
-  @Column({ type: 'tinyint', nullable: true, default: 1 })
-  status: number
+  @Column({ type: 'tinyint', nullable: true, default: UserStatus.Enabled, enum: UserStatus, enumName: 'UserStatus' })
+  status: UserStatus
 
   @ManyToMany(() => RoleEntity, role => role.users)
   @JoinTable({

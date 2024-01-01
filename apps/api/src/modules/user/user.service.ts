@@ -24,7 +24,7 @@ import { RoleEntity } from '../system/role/role.entity'
 
 import { UserStatus } from './constant'
 import { PasswordUpdateDto } from './dto/password.dto'
-import { UserDto, UserQueryDto, UserUpdateDto } from './dto/user.dto'
+import { UserDto, UserQueryDto, UserStatusDto, UserUpdateDto } from './dto/user.dto'
 import { UserEntity } from './entities/user.entity'
 import { AccountInfo } from './user.model'
 import { DeptService } from '../system/dept/dept.service'
@@ -182,8 +182,8 @@ export class UserService {
         roles: await this.roleRepository.findBy({ id: In(roles) } ),
       })
 
-      const result = await manager.save(u)
-      return result
+      const newUser = await manager.save(u)
+      return newUser
     })
   }
 
@@ -195,8 +195,7 @@ export class UserService {
     { password, deptId, roleIds, status, ...data }: UserUpdateDto,
   ): Promise<void> {
     await this.entityManager.transaction(async (manager) => {
-      if (password)
-        await this.forceUpdatePassword(id, password)
+      if (password) await this.forceUpdatePassword(id, password)
 
       await manager.update(UserEntity, id, {
         ...data,
@@ -227,9 +226,9 @@ export class UserService {
         .of(id)
         .set(deptId)
 
-      if (status === 0) {
+      if (status === UserStatus.Disable) {
         // 禁用状态
-        await this.forbidden(id)
+        await this.multiForbidden(id)
       }
     })
   }
@@ -335,17 +334,17 @@ export class UserService {
   /**
    * 禁用用户
    */
-  async forbidden(uid: number): Promise<void> {
-    await this.redis.del(`admin:passwordVersion:${uid}`)
-    await this.redis.del(`admin:token:${uid}`)
-    await this.redis.del(`admin:perms:${uid}`)
+  async forbidden(uid: number, { status }: UserStatusDto): Promise<void> {
+    await this.userRepository.update(uid, { status })
+    await this.multiForbidden(uid)
   }
 
   /**
    * 禁用多个用户
    */
-  async multiForbidden(uids: number[]): Promise<void> {
+  async multiForbidden(uids: number | number[]): Promise<void> {
     if (uids) {
+      if (!Array.isArray(uids)) uids = [uids]
       const pvs: string[] = []
       const ts: string[] = []
       const ps: string[] = []

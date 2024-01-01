@@ -8,7 +8,7 @@ import { MenuService } from '~/modules/system/menu/menu.service'
 import { Perm, PermissionMap } from '../auth/decorators/permission.decorator'
 
 import { UserPasswordDto } from './dto/password.dto'
-import { UserDto, UserQueryDto, UserUpdateDto } from './dto/user.dto'
+import { UserDto, UserQueryDto, UserStatusDto, UserUpdateDto } from './dto/user.dto'
 import { UserService } from './user.service'
 
 export const permissions: PermissionMap<'system:user'> = {
@@ -61,6 +61,13 @@ export class UserController {
   ): Promise<void> {
     await this.userService.update(id, dto)
     await this.menuService.refreshPerms(id)
+  }
+
+  @Put('toggleStatus/:id')
+  @ApiOperation({ summary: '启用|禁用用户' })
+  @Perm(permissions.UPDATE)
+  async forbidden(@IdParam() id: number, @Body() dto: UserStatusDto): Promise<void> {
+    await this.userService.forbidden(id, dto)
   }
 
   @Delete(':id')

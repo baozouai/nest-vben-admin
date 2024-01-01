@@ -6,7 +6,7 @@
     @back="goBack"
   >
     <template #extra>
-      <a-button type="primary" danger> 禁用账号 </a-button>
+      <a-button type="primary" :danger="enabled"  @click="toggleStatus"> {{ enabled ? '禁': '启' }}用账号 </a-button>
       <a-button type="primary" @click="handlePassword"> 修改为默认密码 </a-button>
     </template>
     <template #footer>
@@ -33,15 +33,20 @@
   import { PageWrapper } from '/@/components/Page';
   import { useGo } from '/@/hooks/web/usePage';
   import { useTabs } from '/@/hooks/web/useTabs';
-  import { getUserInfo, updateUserPassword } from '/@/api/system/user';
+  import { toggleUserStatus, getUserInfo, updateUserPassword } from '/@/api/system/user';
+import { computed } from 'vue';
+import { message } from 'ant-design-vue';
+
 
   const route = useRoute();
   const go = useGo();
   const userId = ref<number>(route.params?.id as unknown as number);
-  const userInfo = ref({});
+  const userInfo = ref<{ status?: number }>({});
   const currentKey = ref('detail');
   const { setTitle } = useTabs();
 
+  const enabled = computed(() => !!userInfo.value.status)
+  console.log(enabled.value)
   onMounted(async () => {
     console.log('mounted');
     userInfo.value = await getUserInfo(userId.value);
@@ -50,6 +55,14 @@
 
   async function handlePassword() {
     await updateUserPassword({ id: parseInt(userId.value), password: 'a123456' });
+  }
+
+  async function toggleStatus() {
+    const newStatus = enabled.value ? 0 : 1;
+     toggleUserStatus(parseInt(userId.value), { status: newStatus }).then(() => {
+      message.success('操作成功');
+      userInfo.value.status = newStatus;
+     })
   }
 
   setTitle('详情：用户' + userId.value);

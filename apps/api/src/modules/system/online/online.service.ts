@@ -51,7 +51,7 @@ export class OnlineService {
       throw new BusinessException(ErrorEnum.NOT_ALLOWED_TO_LOGOUT_USER)
 
     // reset redis keys
-    await this.userService.forbidden(uid)
+    await this.userService.multiForbidden(uid)
     // socket emit
     const socket = await this.findSocketIdByUid(uid)
     if (socket) {

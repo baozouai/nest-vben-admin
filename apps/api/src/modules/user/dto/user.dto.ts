@@ -1,4 +1,4 @@
-import { ApiProperty, IntersectionType, PartialType } from '@nestjs/swagger'
+import { ApiProperty, IntersectionType, PartialType, PickType } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import {
   ArrayMaxSize,
@@ -18,10 +18,8 @@ import {
 import { isEmpty } from 'lodash'
 
 import { PagerDto } from '~/common/dto/pager.dto'
-export enum UserStatus {
-  DISABLE,
-  ENABLE,
-}
+import { UserStatus } from '../constant'
+
 export class UserDto {
   @ApiProperty({ description: '登录账号', example: 'kz-admin' })
   @IsString()
@@ -77,7 +75,7 @@ export class UserDto {
   @IsString()
   remark?: string
 
-  @ApiProperty({ description: '状态', enum: UserStatus, enumName: 'UserStatus' })
+  @ApiProperty({ title: '状态', enum: UserStatus, enumName: 'UserStatus' })
   @IsEnum(UserStatus)
   status: UserStatus
 }
@@ -95,3 +93,5 @@ export class UserQueryDto extends IntersectionType(PagerDto<UserDto>, PartialTyp
   // @IsOptional()
   // status: number
 }
+
+export class UserStatusDto extends PickType(UserDto, ['status']) {}

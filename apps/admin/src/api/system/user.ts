@@ -44,6 +44,7 @@ export interface UpdateUserPassword {
 enum Api {
   Base = '/system/users',
   Password = '/system/users/password',
+  Forbidden ='/system/users/toggleStatus'
 }
 
 export const getUserList = (params?: BasicPageParams) =>
@@ -59,4 +60,7 @@ export const updateUser = (id: number, params: UpdateUserParams) =>
 export const deleteUser = (id: number) => defHttp.delete({ url: `${Api.Base}/${id}` });
 
 export const updateUserPassword = (params: UpdateUserPassword) =>
-  defHttp.patch({ url: Api.Password, params });
+  defHttp.put({ url: Api.Password, params });
+
+  export const toggleUserStatus = (id: number, params: { status: 0 | 1 }) =>
+  defHttp.put({ url: `${Api.Forbidden}/${id}`,  params });
