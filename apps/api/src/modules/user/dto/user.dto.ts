@@ -5,6 +5,7 @@ import {
   ArrayMinSize,
   ArrayNotEmpty,
   IsEmail,
+  IsEnum,
   IsIn,
   IsInt,
   IsOptional,
@@ -17,7 +18,10 @@ import {
 import { isEmpty } from 'lodash'
 
 import { PagerDto } from '~/common/dto/pager.dto'
-
+export enum UserStatus {
+  DISABLE,
+  ENABLE,
+}
 export class UserDto {
   @ApiProperty({ description: '登录账号', example: 'kz-admin' })
   @IsString()
@@ -73,9 +77,9 @@ export class UserDto {
   @IsString()
   remark?: string
 
-  @ApiProperty({ description: '状态' })
-  @IsIn([0, 1])
-  status: number
+  @ApiProperty({ description: '状态', enum: UserStatus, enumName: 'UserStatus' })
+  @IsEnum(UserStatus)
+  status: UserStatus
 }
 
 export class UserUpdateDto extends PartialType(UserDto) {}
@@ -86,8 +90,8 @@ export class UserQueryDto extends IntersectionType(PagerDto<UserDto>, PartialTyp
   @IsOptional()
   deptId: number
 
-  @ApiProperty({ description: '状态', example: 0 })
-  @IsInt()
-  @IsOptional()
-  status: number
+  // @ApiProperty({ description: '状态', example: 0 })
+  // @IsInt()
+  // @IsOptional()
+  // status: number
 }

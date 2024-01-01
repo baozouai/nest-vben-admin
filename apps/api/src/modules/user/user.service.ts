@@ -3,7 +3,7 @@ import { BadRequestException, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import Redis from 'ioredis'
-import { isEmpty, isNil } from 'lodash'
+import { isEmpty, isNil, isUndefined } from 'lodash'
 
 import { EntityManager, In, Like, Repository } from 'typeorm'
 
@@ -325,7 +325,7 @@ export class UserService {
         ...(username ? { username: Like(`%${username}%`) } : null),
         ...(nickname ? { nickname: Like(`%${nickname}%`) } : null),
         ...(email ? { email: Like(`%${email}%`) } : null),
-        ...(status ? { status } : null),
+        ...(isUndefined(status) ? null: { status }),
         ...(deptId ? { dept: { id: In(await this.deptService.getDeptIds(deptId)) } } : null),
       },
       relations: ['dept', 'roles']
