@@ -30,7 +30,7 @@ export class AuthController {
   @ApiBody({ type: LoginDto })
   async login(
     // 调用login之前已经通过localGuard的strategy validate了，所以这里能拿到user
-    @AuthUser() user: IAuthUser,
+    @AuthUser('uid') uid: number,
     @Ip() ip: string,
     @Headers('user-agent') ua: string,
   ): Promise<LoginToken> {
@@ -38,7 +38,7 @@ export class AuthController {
     const token = await this.authService.login(
       // dto.username,
       // dto.password,
-      user,
+      uid,
       ip,
       ua,
     )

@@ -90,11 +90,10 @@ export class AuthService {
    * 返回null则账号密码有误，不存在该用户
    */
   async login(
-    user: IAuthUser,
+    uid: number,
     ip: string,
     ua: string,
   ): Promise<string> {
-    const { uid } = user
 
     const roleIds = await this.roleService.getRoleIdsByUser(uid)
 
