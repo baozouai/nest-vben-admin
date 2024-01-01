@@ -14,7 +14,7 @@ export class CronService {
   constructor(
     private readonly configService: ConfigService,
   ) {}
-
+  /** 在晚上12点删除过期jwt */
   @CronOnce(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async deleteExpiredJWT() {
     this.logger.log('--> 开始扫表，清除过期的 token')

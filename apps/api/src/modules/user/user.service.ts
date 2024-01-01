@@ -86,7 +86,7 @@ export class UserService {
     if (isEmpty(user))
       throw new BusinessException(ErrorEnum.USER_NOT_FOUND)
 
-    delete user?.psalt
+    // delete user?.psalt
 
     return user
   }

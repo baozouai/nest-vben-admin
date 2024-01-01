@@ -15,12 +15,14 @@ import { AccountInfo } from '../../user/user.model'
 import { UserService } from '../../user/user.service'
 import { AuthService } from '../auth.service'
 import { AccountUpdateDto } from '../dto/account.dto'
+import { Route } from '~/utils'
 // import { JwtAuthGuard } from '../guards/jwt-auth.guard'
 
 @ApiTags('Account - 账户模块')
 @ApiSecurityAuth()
 @ApiExtraModels(AccountInfo)
 // @UseGuards(JwtAuthGuard)
+@AllowAnon()
 @Controller('account')
 export class AccountController {
   constructor(
@@ -31,14 +33,12 @@ export class AccountController {
   @Get('profile')
   @ApiOperation({ summary: '获取账户资料' })
   @ApiResult({ type: AccountInfo })
-  @AllowAnon()
   async profile(@AuthUser() user: IAuthUser): Promise<AccountInfo> {
     return this.userService.getAccountInfo(user.uid)
   }
 
   @Get('logout')
   @ApiOperation({ summary: '账户登出' })
-  @AllowAnon()
   async logout(@AuthUser() user: IAuthUser): Promise<void> {
     await this.authService.clearLoginStatus(user.uid)
   }
@@ -46,22 +46,19 @@ export class AccountController {
   @Get('menus')
   @ApiOperation({ summary: '获取菜单列表' })
   @ApiResult({ type: [MenuEntity] })
-  @AllowAnon()
-  async menu(@AuthUser() user: IAuthUser): Promise<string[]> {
+  async menu(@AuthUser() user: IAuthUser): Promise<Route[]> {
     return this.authService.getMenus(user.uid)
   }
 
   @Get('permissions')
   @ApiOperation({ summary: '获取权限列表' })
   @ApiResult({ type: [String] })
-  @AllowAnon()
   async permissions(@AuthUser() user: IAuthUser): Promise<string[]> {
     return this.authService.getPermissions(user.uid)
   }
 
   @Put('update')
   @ApiOperation({ summary: '更改账户资料' })
-  @AllowAnon()
   async update(
     @AuthUser() user: IAuthUser,
     @Body() dto: AccountUpdateDto,
@@ -71,7 +68,6 @@ export class AccountController {
 
   @Post('password')
   @ApiOperation({ summary: '更改账户密码' })
-  @AllowAnon()
   async password(
     @AuthUser() user: IAuthUser,
     @Body() dto: PasswordUpdateDto,

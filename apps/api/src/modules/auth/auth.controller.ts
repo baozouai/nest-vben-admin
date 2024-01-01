@@ -12,6 +12,7 @@ import { LoginDto, RegisterDto } from './dto/auth.dto'
 import { LocalGuard } from './guards/local.guard'
 import { LoginToken } from './models/auth.model'
 import { FastifyRequest } from 'fastify'
+import { AuthUser } from './decorators/auth-user.decorator'
 
 @ApiTags('Auth - 认证模块')
 @Public()
@@ -28,7 +29,8 @@ export class AuthController {
   @ApiResult({ type: LoginToken })
   @ApiBody({ type: LoginDto })
   async login(
-    @Req() req: FastifyRequest,
+    // 调用login之前已经通过localGuard的strategy validate了，所以这里能拿到user
+    @AuthUser() user: IAuthUser,
     @Ip() ip: string,
     @Headers('user-agent') ua: string,
   ): Promise<LoginToken> {
@@ -36,7 +38,7 @@ export class AuthController {
     const token = await this.authService.login(
       // dto.username,
       // dto.password,
-      req.user,
+      user,
       ip,
       ua,
     )

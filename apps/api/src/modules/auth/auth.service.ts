@@ -10,7 +10,7 @@ import { ErrorEnum } from '~/constants/error-code.constant'
 
 import { UserService } from '~/modules/user/user.service'
 
-import { md5 } from '~/utils'
+import { Route, md5 } from '~/utils'
 
 import { LoginLogService } from '../system/log/services/login-log.service'
 import { MenuService } from '../system/menu/menu.service'
@@ -156,7 +156,7 @@ export class AuthService {
   /**
    * 获取菜单列表
    */
-  async getMenus(uid: number): Promise<string[]> {
+  async getMenus(uid: number): Promise<Route[]> {
     return this.menuService.getMenus(uid)
   }
 

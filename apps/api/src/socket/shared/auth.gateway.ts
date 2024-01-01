@@ -46,7 +46,7 @@ export function createAuthGateway(options: AuthGatewayOptions): new (...args: an
       )
       client.disconnect()
     }
-
+    
     async authToken(token: string): Promise<boolean> {
       if (typeof token !== 'string')
         return false

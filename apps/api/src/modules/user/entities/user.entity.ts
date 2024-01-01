@@ -25,6 +25,7 @@ export class UserEntity extends AbstractEntity {
   @Exclude()
   @Column()
   password: string
+  
   @Exclude()
   @Column({ length: 32 })
   psalt: string

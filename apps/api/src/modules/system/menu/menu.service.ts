@@ -10,7 +10,7 @@ import { BusinessException } from '~/common/exceptions/biz.exception'
 import { ErrorEnum } from '~/constants/error-code.constant'
 import { MenuEntity } from '~/modules/system/menu/menu.entity'
 
-import { deleteEmptyChildren, generatorMenu, generatorRouters } from '~/utils'
+import { Route, deleteEmptyChildren, generatorMenu, generatorRouters } from '~/utils'
 
 import { RoleService } from '../role/role.service'
 
@@ -66,12 +66,11 @@ export class MenuService {
   /**
    * 根据角色获取所有菜单
    */
-  async getMenus(uid: number): Promise<string[]> {
+  async getMenus(uid: number): Promise<Route[]> {
     const roleIds = await this.roleService.getRoleIdsByUser(uid)
     let menus: MenuEntity[] = []
 
-    if (isEmpty(roleIds))
-      return generatorRouters([])
+    if (isEmpty(roleIds)) return []
 
     if (this.roleService.hasAdminRole(roleIds)) {
       menus = await this.menuRepository.find({ order: { orderNo: 'ASC' } })
